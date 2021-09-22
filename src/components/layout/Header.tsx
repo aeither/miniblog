@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Link } from "@chakra-ui/react";
+import { Box, Flex, Heading, Link, HStack, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { FiExternalLink } from "react-icons/fi";
 
@@ -15,11 +15,13 @@ const Header = () => {
         <Link
           pr="2"
           alignSelf="center"
-          d="inline"
           href="https://github.com/aeither/miniblog"
           isExternal
         >
-          Github <FiExternalLink d="flex" />
+          <HStack>
+            <Text>Github</Text>
+            <Box as={FiExternalLink} size="16px" />
+          </HStack>
         </Link>
         <ThemeToggle />
       </Box>
