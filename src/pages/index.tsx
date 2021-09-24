@@ -17,8 +17,12 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
+  FormLabel,
+  FormControl,
+  Input,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { FiPlusCircle } from "react-icons/fi";
 import { useMoralis } from "react-moralis";
 import { Contract } from "web3-eth-contract";
@@ -39,11 +43,22 @@ type Post = {
   title: string;
 };
 
+type IFormInput = {
+  title: string;
+  content: string;
+};
+
 const Home = () => {
   const [contract, setContract] = useState<Contract>();
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [latestPosts, setLatestPosts] = useState<Array<Post>>();
   const { authenticate, isAuthenticated, user, logout, Moralis } = useMoralis();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<IFormInput>();
 
   const GRAY = useColorModeValue("gray.100", "gray.700");
 
@@ -98,6 +113,38 @@ const Home = () => {
     }
   }, [contract, isAuthenticated]);
 
+  const NewPostForm = () => {
+    const onSubmit: SubmitHandler<IFormInput> = ({
+      title,
+      content,
+    }: IFormInput) => {
+      contract?.methods
+        .createPost(title, content)
+        .send({ from: userAddress })
+        .then((receipt: unknown) => {
+          console.log(receipt);
+        });
+    };
+
+    return (
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormControl>
+          <FormLabel htmlFor="title">Title</FormLabel>
+          <Input id="title" placeholder="title" {...register("title")} />
+          <FormLabel htmlFor="content">Content</FormLabel>
+          <Input id="content" placeholder="content" {...register("content")} />
+        </FormControl>
+        <Button
+          mt={4}
+          colorScheme="teal"
+          isLoading={isSubmitting}
+          type="submit"
+        >
+          Submit
+        </Button>
+      </form>
+    );
+  };
   const Header = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -117,13 +164,10 @@ const Home = () => {
             <ModalHeader>Create Post</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Text>
-                content contentcontentcontentcontent content content content
-                content content
-              </Text>
+              <NewPostForm />
             </ModalBody>
             <ModalFooter>
-              <Button onClick={onClose}>Create</Button>
+              <></>
             </ModalFooter>
           </ModalContent>
         </Modal>
